@@ -17,17 +17,15 @@ def monolayer_graphene():
 
     lat.add_sublattices(('A', [0, -a_cc/2]),
                         ('B', [0,  a_cc/2]),
-                        #('C', [2*a_cc, 0]),
-                        #('D', [-2*a_cc, 0])
-
-
                         ) 
     lat.add_hoppings(
         # inside the main cell
         ([0,  0], 'A', 'B', t),
         # between neighboring cells
         ([1, -1], 'A', 'B', t),
-        ([0, -1], 'A', 'B', t)
+        ([0, -1], 'A', 'B', t),
+        ([1, 1], 'A', 'A', t)
+
     )
     return lat
 
