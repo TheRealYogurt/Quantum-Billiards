@@ -15,7 +15,7 @@ solver = pb.solver.lapack(model)  # eigensolver from the LAPACK library
 
 model.plot()
 
-
+plt.figure()
 # significant points in graphene's Brillouin zone
 a_cc = graphene.a_cc  # carbon-carbon distance
 Gamma = [0, 0]
@@ -24,6 +24,6 @@ M = [0, 2*pi / (3*a_cc)]
 K2 = [2*pi / (3*sqrt(3)*a_cc), 2*pi / (3*a_cc)]
 
 # plot the bands through the desired points
-#bands = solver.calc_bands(K1, Gamma, M, K2)
-#bands.plot(point_labels=['K', r'$\Gamma$', 'M', 'K'])
+bands = solver.calc_bands(K1, Gamma, M, K2)
+bands.plot(point_labels=['K', r'$\Gamma$', 'M', 'K'])
 plt.show()
