@@ -35,7 +35,6 @@ N_smooth = poly(Sorted_Eigenvalues) # extracting the smoothed over Eigenvalues
 S_n_2 = np.diff(N_smooth); S_n_normalised_2 = S_n_2/np.mean(S_n_2) # Compute spacings between each level
 #################################### POLYNOMIAL FITTING ####################################
 
-
 #------------- SETTING UP 2x2 GRID FOR ALL PLOTS ----------------------#
 s = np.linspace(0, 6, 100000) # create an array to plot perfect model
 fig, axs = plt.subplots(2, 2, figsize=(14, 10))
@@ -76,6 +75,6 @@ ax.plot(s, (32 / (np.pi**2)) * s**2 * np.exp(- (4 / np.pi) * s**2), linestyle='d
 ax.set_xlabel("Unfolded Level Spacing $S$"); ax.set_ylabel("Probability $P(S)$"); ax.set_title("Level Spacing Distribution- Polynomial Fit")
 ax.legend(); ax.grid()
 
-fig.suptitle("Africa Billiard", fontsize=18, y=1.02)  
-plt.tight_layout()
-plt.show() # spit out the plots 
+fig.suptitle("Africa Billiard", fontsize=18, y=0.99)  # title 
+fig.tight_layout(rect=[0, 0, 1, 0.99])  
+plt.show() # spit out the plots

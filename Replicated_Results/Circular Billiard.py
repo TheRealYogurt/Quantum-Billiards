@@ -70,6 +70,6 @@ ax.plot(s, (32 / (np.pi**2)) * s**2 * np.exp(- (4 / np.pi) * s**2), linestyle='d
 ax.set_xlabel("Unfolded Level Spacing $S$"); ax.set_ylabel("Probability $P(S)$"); ax.set_title("Level Spacing Distribution- Polynomial Fit")
 ax.legend(); ax.grid()
 
-fig.suptitle("Circle Billiard", fontsize=18, y=1.02) 
-plt.tight_layout()
-plt.show() # spit out the plots 
+fig.suptitle("Circle Billiard", fontsize=18, y=0.99)  # title 
+fig.tight_layout(rect=[0, 0, 1, 0.99])  
+plt.show() # spit out the plots
