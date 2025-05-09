@@ -4,7 +4,7 @@ from math import pi, sqrt
 from numpy.polynomial import Polynomial
 
 #################################### THE SYSTEM #################################### 
-scale = 4; circle =  pb.circle(radius=2*scale) # define a circle with radius 1nm
+scale = 5; circle =  pb.circle(radius=2*scale) # define a circle with radius 1nm
 model = pb.Model(graphene.monolayer(),circle); #plt.figure(figsize=(6,4)); model.plot() # define the model and plot it 
 #################################### THE SYSTEM #################################### 
 
@@ -25,7 +25,7 @@ S_n_1 = np.diff(E_smooth); S_n_normalised_1 = S_n_1/np.mean(S_n_1)  # spacings b
 #################################### ROLLING AVERAGE ####################################
 
 #################################### POLYNOMIAL FITTING ####################################
-poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg = 57)
+poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg = 101)
 N_smooth = poly(Sorted_Eigenvalues) # extracting the smoothed over Eigenvalues
 S_n_2 = np.diff(N_smooth); S_n_normalised_2 = S_n_2/np.mean(S_n_2)  # spacings between each level  
 #################################### POLYNOMIAL FITTING ####################################
@@ -33,7 +33,7 @@ S_n_2 = np.diff(N_smooth); S_n_normalised_2 = S_n_2/np.mean(S_n_2)  # spacings b
 #------------- SETTING UP 2x2 GRID FOR ALL PLOTS ----------------------#
 s = np.linspace(0, 6, 100000) # create an array to plot perfect model
 fig, axs = plt.subplots(2, 2, figsize=(14, 10))
-Bin = round(sqrt(len(Sorted_Eigenvalues)))
+Bin = round(sqrt(len(Sorted_Eigenvalues)) * 0.75)
 #------------- SETTING UP 2x2 GRID FOR ALL PLOTS ----------------------#
 
 #-------------PLOT 1: Rolling Average - Spectral Staircase----------------------#
