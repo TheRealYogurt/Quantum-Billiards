@@ -12,7 +12,7 @@ circle3 = pb.circle(radius= rad, center=[-x,y]); circle4 = pb.circle(radius= rad
 circle5 = pb.circle(radius=rad*0.25, center=[-x/2, y/4]); circle6 = pb.circle(radius=rad*0.25, center=[x/4, -y/2]) 
 
 
-shape = circle1 + circle2 + circle3 + circle4 - circle5 - circle6;  shape.plot()
+shape = circle1 + circle2 + circle3 + circle4 - circle5 - circle6;  #plt.figure; shape.plot()
 
 
 model = pb.Model(graphene.monolayer(),shape); #model.plot()

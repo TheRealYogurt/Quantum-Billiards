@@ -4,7 +4,7 @@ from math import pi, sqrt
 from numpy.polynomial import Polynomial
 
 #################################### THE SYSTEM #################################### 
-scale = 5; circle =  pb.circle(radius=2*scale) # define a circle with radius 1nm
+scale = 1; circle =  pb.circle(radius=2*scale) # define a circle with radius 1nm
 model = pb.Model(graphene.monolayer(),circle); #plt.figure(figsize=(6,4)); model.plot() # define the model and plot it 
 #################################### THE SYSTEM #################################### 
 
@@ -71,5 +71,5 @@ ax.set_xlabel("Unfolded Level Spacing $S$"); ax.set_ylabel("Probability $P(S)$")
 ax.legend(); ax.grid()
 
 fig.suptitle("Circle Billiard", fontsize=18, y=0.99)  # title 
-fig.tight_layout(rect=[0, 0, 1, 0.99])  
+fig.tight_layout(rect=[0, 0, 1, 0.99])
 plt.show() # spit out the plots

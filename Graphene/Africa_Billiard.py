@@ -4,7 +4,7 @@ from math import pi, sqrt
 from numpy.polynomial import Polynomial
 
 #################################### THE SYSTEM #################################### 
-scale = 4; x0 = 1.1 * scale; y0 = 0.5* scale; shifty = 1.44* scale; shiftx = -0.6* scale
+scale = 2; x0 = 1.1 * scale; y0 = 0.5* scale; shifty = 1.44* scale; shiftx = -0.6* scale
 circle1 =  pb.circle(radius=2* scale) # define a circle with radius 1nm
 circle2 = pb.circle(radius=1.31* scale, center=[-1.7* scale, 0.66* scale]) # define a circle with radius 1nm
 rectangle = pb.Polygon([[x0 + shiftx, y0+ shifty], [x0+ shiftx, -y0+ shifty], [-x0+ shiftx, -y0+ shifty], [-x0+ shiftx, y0+ shifty]])
@@ -30,7 +30,7 @@ S_n_1 = np.diff(E_smooth); S_n_normalised_1 = S_n_1/np.mean(S_n_1) # Compute spa
 #################################### ROLLING AVERAGE ####################################
 
 #################################### POLYNOMIAL FITTING ####################################
-poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg=101)
+poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg=47)
 N_smooth = poly(Sorted_Eigenvalues) # extracting the smoothed over Eigenvalues
 S_n_2 = np.diff(N_smooth); S_n_normalised_2 = S_n_2/np.mean(S_n_2) # Compute spacings between each level
 #################################### POLYNOMIAL FITTING ####################################
@@ -76,5 +76,5 @@ ax.set_xlabel("Unfolded Level Spacing $S$"); ax.set_ylabel("Probability $P(S)$")
 ax.legend(); ax.grid()
 
 fig.suptitle("Africa Billiard", fontsize=18, y=0.99)  # title 
-fig.tight_layout(rect=[0, 0, 1, 0.99])  
+fig.tight_layout(rect=[0, 0, 1, 0.99])
 plt.show() # spit out the plots
