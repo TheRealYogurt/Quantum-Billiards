@@ -50,17 +50,17 @@ shape5 = circle1 + circle2 + circle3 + circle4 - circle5 - circle6;  #plt.figure
 ###################### 6 Circle Billiard ######################
 
 
-model = pb.Model(graphene.monolayer(), shape2); k = 200 * scale
+model = pb.Model(graphene.monolayer(), shape2); k = 350 * scale
 solver = pb.solver.arpack(model, k=int(k), sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
 
 eigenvalues = solver.eigenvalues # Eigen values - energies 
 eigenvectors = solver.eigenvectors # Eigen vector - eigen wave functions 
 positions = solver.system.positions # real space positions of each atom - i think 
 
-
-r = np.column_stack(positions); steps = np.size(r[:,0])
-kx = np.linspace(-np.pi, np.pi, steps)
-ky = np.linspace(-np.pi, np.pi, steps)
+fscale = 8
+r = np.column_stack(positions); steps = 4*np.size(r[:,0])
+kx = np.linspace(-fscale*np.pi, fscale*np.pi, steps)
+ky = np.linspace(-fscale*np.pi, fscale*np.pi, steps)
 kx_grid, ky_grid = np.meshgrid(kx, ky, indexing="ij")
 
 mesh_step = kx[1]-kx[0]
@@ -75,7 +75,8 @@ M_xy = np.zeros((steps,steps),dtype=complex)
 for i in range(steps):
     for j in range(steps):
         fourier_phase = np.exp(-1j * (kx[i] * r[:, 0] + ky[j] * r[:, 1]))
-        M_xy[i,j] = np.dot(psi,fourier_phase) * mesh_step**2 # this should be the integral of the fourier transform 
+        M_xy[i,j] = np.dot(psi,fourier_phase) * mesh_step**2 # this should be the integral of the fourier transform
+    print(i,steps)         
         
 M_xy /= np.sqrt(len(psi))
 
