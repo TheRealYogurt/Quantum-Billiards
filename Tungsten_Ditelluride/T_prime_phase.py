@@ -39,7 +39,6 @@ def monolayer_1T_WTe2_SOC():
         ('Te2',[ 0.25 * a, 0.07 * b], mu_p_spinor) # Sublattice B 
     )
     
-    #lat.add_sublattices(('Te1_p',[-0.25 * a, -0.07 * b], mu_p_spinor)), # Sublattice A)
 
     # Function to calculate the hopping parameter
     def hopping_parameter(t, lambda_x, lambda_y, lambda_z): 
@@ -139,7 +138,6 @@ def monolayer_1T_WTe2_basic():
         ('Te2',[ 0.25 * a, 0.07 * b], mu_p_spinor) # Sublattice B 
     )
     
-    #lat.add_sublattices(('Te1_p',[-0.25 * a, -0.07 * b], mu_p_spinor)), # Sublattice A)
 
     # Function to calculate the hopping parameter
     def hopping_parameter(t, lambda_x, lambda_y, lambda_z): 
@@ -203,6 +201,7 @@ def monolayer_1T_WTe2_basic():
 
     return lat
 
+plt.figure(); lattice = monolayer_1T_WTe2_SOC(); lattice.plot() # plot he actuale lattice with the hoppings 
 
 # High symmetry points for a rectangular lattice: 
 a = 3.477; b = 6.249; a1=[a, 0]; a2=[0, b] 
@@ -211,19 +210,22 @@ X = np.array([np.pi/a, 0])  # X Point
 Y = np.array([0, np.pi/b])  # Y Point
 M = np.array([np.pi/a, np.pi/b])  # M Point
 
-plt.figure()
+fig, axs = plt.subplots(2, 1, figsize=(4, 5)) # set the single figure band plots
+
+# First subplot: Sping orbit coupling model 
+plt.sca(axs[0]) # set the axis 
 model_soc = pb.Model(monolayer_1T_WTe2_SOC(), pb.translational_symmetry())
 solver_soc = pb.solver.lapack(model_soc)
 bands_soc = solver_soc.calc_bands(Gamma, X, Y, M)
 bands_soc.plot(point_labels=[r'$\Gamma$', 'X', 'Y', 'M'])
-plt.title("Band Structure: Spin Orbit Coupling")
+axs[0].set_title("Band Structure: Spin Orbit Coupling")
 
-
-plt.figure()
+# Second subplot: Basic model
+plt.sca(axs[1]) # set the axis
 model_basic = pb.Model(monolayer_1T_WTe2_basic(), pb.translational_symmetry())
 solver_basic = pb.solver.lapack(model_basic)
 band_basic = solver_basic.calc_bands(Gamma, X, Y, M)
 band_basic.plot(point_labels=[r'$\Gamma$', 'X', 'Y', 'M'])
-plt.title("Band Structure: Basic")
+axs[1].set_title("Band Structure: Basic")
 
-plt.show()
+plt.tight_layout(); plt.show()
