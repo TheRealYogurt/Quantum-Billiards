@@ -7,7 +7,7 @@ i = 1j
 sigma_0 = np.array([[1, 0], [0, 1]]); sigma_x = np.array([[0, 1], [1, 0]])
 sigma_y = np.array([[0, -i], [i, 0]]); sigma_z = np.array([[1, 0], [0, -1]])
 
-def QWZ_Model(t, M, a, b):
+def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
 
 
     # Lattice vectors:
@@ -49,7 +49,7 @@ Y = np.array([0, np.pi/b])
 M_point = np.array([np.pi/a, np.pi/b])
 
 
-cap = 4
+cap = 2
 M_list = np.linspace(-cap, cap, 2*cap+1)
 
 # Create subplots: 1 row per M, 2 columns (left=linear, right=high symmetry)
@@ -62,18 +62,18 @@ for idx, M_val in enumerate(M_list):
     solver = pb.solver.lapack(model)
 
     #Linear Path Plot (Left)
-    bands_linear = solver.calc_bands(-X, Gamma, X)
+    bands_linear = solver.calc_bands(-M_point, -Y, -X, Gamma)
     ax_left = axs[idx, 0]
     plt.sca(ax_left)
-    bands_linear.plot(point_labels=['-X', r'$\Gamma$', 'X'])
-    ax_left.set_title(f"Linear Path (M = {M_val})")
+    bands_linear.plot(point_labels=['-M', '-Y', '-X', r'$\Gamma$'])
+    ax_left.set_title(f"High Symmetry Path - Negative (M = {M_val})")
 
     # High Symmetry Path Plot (Right)
     bands_highsym = solver.calc_bands(Gamma, X, Y, M_point)
     ax_right = axs[idx, 1]
     plt.sca(ax_right)
     bands_highsym.plot(point_labels=[r'$\Gamma$', 'X', 'Y', 'M'])
-    ax_right.set_title(f"High Symmetry Path (M = {M_val})")
+    ax_right.set_title(f"High Symmetry Path - Positive (M = {M_val})")
 
 plt.tight_layout(); plt.show()
 
