@@ -43,7 +43,7 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
 d = 0.2; a = d; b = 1.5*d
 t = 1; M = -3 # Onsite energy
 
-""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
+#""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
 # High symmetry points for a rectangular lattice
 Gamma = np.array([0, 0])
 X = np.array([np.pi/a, 0])
@@ -162,7 +162,7 @@ def compute_chern_number(M, t, band, Nk=scale * 100):
             phase = U1 * U2 * U3 * U4 # multiply to get the full phase: exp(iφ) 
             berry_curve = np.log(phase) # iφ
 
-            berry_curve_map[i,j] = berry_curve.imag
+            berry_curve_map[i,j] = berry_curve.imag # φ
 
             berry_flux_total += berry_curve.imag # φ
 
