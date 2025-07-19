@@ -41,9 +41,9 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
 
 # Constants in the model / Lattice size:
 d = 0.2; a = d; b = 1.5*d
-t = 1; M = -3 # Onsite energy
+t = 1; M = 4.7 # Onsite energy
 
-#""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
+""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
 # High symmetry points for a rectangular lattice
 Gamma = np.array([0, 0])
 X = np.array([np.pi/a, 0])
@@ -116,6 +116,20 @@ def H_k(kx, ky, M, t):
 
 scale = 1; cap = scale * np.pi
 
+# Makes the berry phase continuous by removing 2pi jumps
+def phase_correction(phase_current, phase_previous):
+    if phase_current - phase_previous > np.pi:
+        return phase_current - 2 * np.pi
+    elif phase_current - phase_previous < -np.pi:
+            return phase_current + 2 * np.pi
+    else:   
+        return phase_current
+
+# Aligns the phase of the current wavefunction to a reference wavefunction
+def align_phase(current, reference):
+    phase = np.vdot(reference, current)
+    return current * np.exp(-1j * np.angle(phase))
+
 # The Chern number calculation: 
 def compute_chern_number(M, t, band, Nk=scale * 100):
     kx_vals = np.linspace(-cap, cap, Nk) # grid points for the x - axis values 
@@ -144,6 +158,11 @@ def compute_chern_number(M, t, band, Nk=scale * 100):
             ux = vx[:, band]
             uxy = vxy[:, band]
             uy = vy[:, band]
+
+            # Wavefunction alignment - u is the current point, ux is the next point
+            ux = align_phase(ux, u)
+            uxy = align_phase(uxy, ux)
+            uy = align_phase(uy, uxy)
             
             """ 
             (kx, ky+Δk)   --->   (kx+Δk, ky+Δk)
@@ -158,13 +177,19 @@ def compute_chern_number(M, t, band, Nk=scale * 100):
             U3 = np.vdot(uxy, uy) / np.abs(np.vdot(uxy, uy))  #  ⟨u(kx+Δk, ky+Δk) | u(kx, ky+Δk)⟩
             U4 = np.vdot(uy, u) / np.abs(np.vdot(uy, u))      #  ⟨u(kx, ky+Δk) | u(kx, ky)⟩
 
-            # Berry curvature
             phase = U1 * U2 * U3 * U4 # multiply to get the full phase: exp(iφ) 
-            berry_curve = np.log(phase) # iφ
+            
+            # Berry curvature
+            berry_curve = np.log(phase).imag # Im{ ln[ exp(iφ) ] }
 
-            berry_curve_map[i,j] = berry_curve.imag # φ
+            # Correct the phase to make it continuous - avoids 2π jumps
+            if i > 0 and j > 0:
+                berry_curve = phase_correction(berry_curve, berry_curve_map[i - 1, j - 1])
 
-            berry_flux_total += berry_curve.imag # φ
+
+            berry_curve_map[i,j] = berry_curve # φ
+
+            berry_flux_total += berry_curve # φ
 
             chern = round(berry_flux_total / (scale * (cap + cap ))) # have to round because numbers are not integers e.g. 0.99999 
 
@@ -195,12 +220,10 @@ for i in range(num_plots):
     chern, berry_map = compute_chern_number(M = M_list[i], t=t, band=0)
     
     ax = axes[i // 4, i % 4]  
-
-    #c = ax.imshow(berry_map, cmap='plasma')
     
     kx_vals = np.linspace(-cap, cap, scale * 100) # grid points for the x - axis values 
     ky_vals = np.linspace(-cap, cap, scale * 100) # grid points for the y - axis values
-    c = ax.contour(kx_vals, ky_vals, berry_map.T, cmap= 'plasma', levels=100)
+    c = ax.contourf(kx_vals, ky_vals, berry_map.T, cmap= 'plasma') # countourf plot fills the area with colors
     
     ax.set_title(f'Berry Curvature (M={M_list[i]:.1f}, Chern={chern})', fontsize=8)
     ax.set_xlabel('$k_x$', fontsize=10)
