@@ -42,7 +42,7 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
 d = 0.2; a = d; b = 1.5*d
 t = 1; M = 4.7 # Onsite energy
 
-#""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
+""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
 # High symmetry points for a rectangular lattice
 Gamma = np.array([0, 0])
 X = np.array([np.pi/a, 0])
@@ -198,9 +198,12 @@ def compute_chern_number(M, t, band, Nk=scale * 100):
 chern, berry_map = compute_chern_number(M = M, t = t, band = 0)
 print("For M = ", M, ", Chern number:", chern)
 
+kx_vals = np.linspace(-cap, cap, scale * 100) # grid points for the x - axis values 
+ky_vals = np.linspace(-cap, cap, scale * 100) # grid points for the y - axis values
+
 plt.figure(figsize=(6,5))
-plt.imshow(berry_map, cmap='plasma')#, origin='lower', extent=[0, 2*np.pi, 0, 2*np.pi], cmap='RdBu', vmin=-np.pi, vmax=np.pi)
-plt.colorbar(label='Berry curvature')
+plt.contourf(kx_vals, ky_vals, berry_map.T, cmap= 'plasma')
+plt.colorbar()
 plt.title(f'Berry Curvature in BZ (Chern = {chern})')
 plt.xlabel('$k_x$')
 plt.ylabel('$k_y$')
@@ -227,7 +230,7 @@ for i in range(num_plots):
     ax.set_xlabel('$k_x$', fontsize=10)
     ax.set_ylabel('$k_y$', fontsize=10)
 
-    fig.colorbar(c, ax=ax, label='Berry curvature')
+    fig.colorbar(c, ax=ax)
 
 plt.tight_layout(pad=2.0)
 plt.subplots_adjust(wspace=0.4, hspace=0.4)
