@@ -10,7 +10,6 @@ sigma_y = np.array([[0, -i], [i, 0]]); sigma_z = np.array([[1, 0], [0, -1]])
 
 def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
 
-
     # Lattice vectors:
     a1=[a, 0]; a2=[0, b]  
 
@@ -43,14 +42,14 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
 d = 0.2; a = d; b = 1.5*d
 t = 1; M = 4.7 # Onsite energy
 
-""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
+#""" Will produce multiple plots for the ban structure for different values of M (from 'cap' to '-cap'): 
 # High symmetry points for a rectangular lattice
 Gamma = np.array([0, 0])
 X = np.array([np.pi/a, 0])
 Y = np.array([0, np.pi/b])
 M_point = np.array([np.pi/a, np.pi/b])
 
-cap = M
+cap = round(M)
 M_list = np.linspace(-cap, cap, 2*cap+1)
 
 # Create subplots: 1 row per M, 2 columns (left=linear, right=high symmetry)
@@ -208,7 +207,6 @@ plt.ylabel('$k_y$')
 plt.tight_layout()
 plt.show()
 """
-
 
 
 M_list = np.linspace(-M, M, 12) 
