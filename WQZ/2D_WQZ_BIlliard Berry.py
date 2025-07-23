@@ -36,7 +36,8 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 0.2):
 
     return lat
 
-shape = pb.circle(radius=1.5, center=(0, 0))
+rad = 1.5
+shape = pb.circle(radius=rad, center=(0, 0))
 model =pb.Model(QWZ_Model(), shape)
 
 # Eigenvalues and Eigenfunctions for the system in real space 
@@ -45,10 +46,10 @@ wavefunctions = solver.eigenvectors
 eigenvalues = solver.eigenvalues
 positions = solver.system.positions # real space positions of each atom - i think 
  
-fscale = 6
-r = np.column_stack(positions); steps = np.size(r[:,0])
-kx = np.linspace(-fscale * 2*np.pi, fscale * 2*np.pi, steps)
-ky = np.linspace(-fscale * 2*np.pi, fscale * 2*np.pi, steps)
+fscale = 2; cap = fscale * 2 * np.pi
+r = np.column_stack(positions); steps = 8 * np.size(r[:,0])
+kx = np.linspace(-cap, cap, steps)
+ky = np.linspace(-cap, cap, steps)
 kx_grid, ky_grid = np.meshgrid(kx, ky, indexing="ij")
 
 mesh_step = kx[1]-kx[0]
@@ -59,6 +60,7 @@ psi_reshaped = psi.reshape((len(r), 2))  # reshape
 
 
 M_xy = np.zeros((steps,steps),dtype=complex)
+FT_psi = np.zeros((steps, steps, 2), dtype=complex)
 
 # Calculate the Fourier transform of the wavefunction
 for i in range(steps):
@@ -74,7 +76,90 @@ for i in range(steps):
         # Multiply by the mesh step size to get the density
         M_xy[i, j] = U2  * mesh_step**2 
 
+        # Store the Fourier transform for each k-point as a spinor
+        FT_psi[i, j] = U1 * mesh_step**2
+
+    print(f"Progress: {i+1}/{steps}")
+
 # The normalise Momentum distribution
 M_xy /= np.sum(M_xy) 
+FT_psi/= np.sum(FT_psi, axis=0)  
+
+
+# Makes the berry phase continuous by removing 2pi jumps
+def phase_correction(phase_current, phase_previous):
+    if phase_current - phase_previous > np.pi:
+        return phase_current - 2 * np.pi
+    elif phase_current - phase_previous < -np.pi:
+            return phase_current + 2 * np.pi
+    else:   
+        return phase_current
+    
+# Aligns the phase of the current wavefunction to a reference wavefunction
+def align_phase(current, reference):
+    phase = np.vdot(reference, current)
+    return current * np.exp(-1j * np.angle(phase))
+
+
+Nk = steps-1  # Number of k-points in each direction (excluding the last point for periodicity)
+
+berry_flux_total = 0.0 # Initial value of the integral
+    
+berry_curve_map = np.zeros((Nk, Nk))
+
+for i in range(Nk):
+    for j in range(Nk):
+
+        # Energy band (n = 0 or 1)
+        u = FT_psi[i, j]  # wavefunction at (kx, ky)
+        ux = FT_psi[i+1, j]
+        uxy = FT_psi[i+1, j+1]
+        uy = FT_psi[i, j+1]
+
+        #u =  M_xy[i, j]  # wavefunction at (kx, ky)
+        #ux =  M_xy[i+1, j]
+        #uxy = M_xy[i+1, j+1]
+        #uy = M_xy[i, j+1]
+
+        # Wavefunction alignment - u is the current point, ux is the next point
+        ux = align_phase(ux, u)
+        uxy = align_phase(uxy, ux)
+        uy = align_phase(uy, uxy)
+            
+
+        # Berry phase 
+        U1 = np.vdot(u, ux) / np.abs(np.vdot(u, ux))      #  ⟨u(kx, ky) | u(kx+Δk, ky)⟩
+        U2 = np.vdot(ux, uxy) / np.abs(np.vdot(ux, uxy))  #  ⟨u(kx+Δk, ky) | u(kx+Δk, ky+Δk)⟩
+        U3 = np.vdot(uxy, uy) / np.abs(np.vdot(uxy, uy))  #  ⟨u(kx+Δk, ky+Δk) | u(kx, ky+Δk)⟩
+        U4 = np.vdot(uy, u) / np.abs(np.vdot(uy, u))      #  ⟨u(kx, ky+Δk) | u(kx, ky)⟩
+
+        phase = U1 * U2 * U3 * U4 # multiply to get the full phase: exp(iφ) 
+            
+        # Berry curvature
+        berry_curve = np.log(phase).imag # Im{ ln[ exp(iφ) ] }
+
+        # Correct the phase to make it continuous - avoids 2π jumps
+        if i > 0 and j > 0:
+            berry_curve = phase_correction(berry_curve, berry_curve_map[i - 1, j - 1])
+
+
+        berry_curve_map[i,j] = berry_curve # φ
+
+        berry_flux_total += berry_curve # φ
+
+        Chern = round( berry_flux_total / ((2 * cap) )) # have to round because numbers are not integers e.g. 0.99999 
+
+    print(f"Progress: {i+1}/{Nk}")
+
+print(f"Chern number: {Chern}")
+
+# Plotting the Berry curvature map
+plt.figure(figsize=(8, 6))
+plt.contourf(kx[:-1], ky[:-1], berry_curve_map, cmap='plasma')
+plt.title(f'Berry Curvature Map (Chern number: {Chern})')
+plt.xlabel('kx (1/nm)')
+plt.ylabel('ky (1/nm)')
+plt.colorbar()
+plt.show()
 
 
