@@ -169,7 +169,7 @@ print(f"Chern number: {Chern}")
 
 # Plotting the Berry curvature map
 plt.figure()
-plt.contourf(kx[:-1], ky[:-1], berry_curve_map, cmap='plasma')
+plt.contourf(np.linspace(0, 2*cap, Nk, endpoint=False), np.linspace(0, 2*cap, Nk, endpoint=False), berry_curve_map, cmap='plasma')
 plt.title(f'Berry Curvature Map (Chern number: {Chern})')
 plt.xlabel('kx (1/nm)')
 plt.ylabel('ky (1/nm)')
