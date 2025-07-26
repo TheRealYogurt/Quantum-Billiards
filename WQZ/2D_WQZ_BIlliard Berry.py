@@ -36,17 +36,17 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 0.2):
 
     return lat
 
-rad = 1.5
+rad = 2.1; k = int(21**2)
 shape = pb.circle(radius=rad, center=(0, 0))
 model =pb.Model(QWZ_Model(), shape)
 
 # Eigenvalues and Eigenfunctions for the system in real space 
-solver = pb.solver.lapack(model)
+solver = pb.solver.arpack(model, k=k, sigma=0.2)
 wavefunctions = solver.eigenvectors
 eigenvalues = solver.eigenvalues
 positions = solver.system.positions # real space positions of each atom - i think 
  
-fscale = 2; cap = fscale * 2 * np.pi
+fscale = 50; cap = fscale * 2 * np.pi
 r = np.column_stack(positions); steps = 8 * np.size(r[:,0])
 kx = np.linspace(-cap, cap, steps)
 ky = np.linspace(-cap, cap, steps)
@@ -54,37 +54,51 @@ kx_grid, ky_grid = np.meshgrid(kx, ky, indexing="ij")
 
 mesh_step = kx[1]-kx[0]
 
+max_M_xy = np.zeros((k, 2), dtype=complex)
+max_FT_psi = np.zeros((k, 2), dtype=complex) 
 
-n = 0; psi = wavefunctions[:, n] # eigen fucntion, index 0 being the fisrt
-psi_reshaped = psi.reshape((len(r), 2))  # reshape 
+for n in range(len(k)):
+    n = n; psi = wavefunctions[:, n] # eigen fucntion, index 0 being the fisrt
+    psi_reshaped = psi.reshape((len(r), 2))  # reshape 
 
 
-M_xy = np.zeros((steps,steps),dtype=complex)
-FT_psi = np.zeros((steps, steps, 2), dtype=complex)
+    M_xy = np.zeros((steps,steps),dtype=complex)
+    FT_psi = np.zeros((steps, steps, 2), dtype=complex)
 
-# Calculate the Fourier transform of the wavefunction
-for i in range(steps):
-    for j in range(steps):
-        phase = np.exp(-1j * (kx[i] * r[:, 0] + ky[j] * r[:, 1]))  # shape: (num_sites,)
+    # Calculate the Fourier transform of the wavefunction
+    for i in range(steps):
+        for j in range(steps):
+            phase = np.exp(-1j * (kx[i] * r[:, 0] + ky[j] * r[:, 1]))  # shape: (num_sites,)
 
-        # Apply the fourier transform to the wavefunction fourier phase * [psi_up, psi_down] 
-        U1 =np.dot(psi_reshaped.T, phase) 
+            # Apply the fourier transform to the wavefunction fourier phase * [psi_up, psi_down] 
+            U1 =np.dot(psi_reshaped.T, phase) 
 
-        # Sum over all orbitals to get the total transform at each k-point
-        U2 = np.sum(U1)
-      
-        # Multiply by the mesh step size to get the density
-        M_xy[i, j] = U2  * mesh_step**2 
+            # Sum over all orbitals to get the total transform at each k-point
+            U2 = np.sum(U1)
+        
+            # Multiply by the mesh step size to get the density
+            M_xy[i, j] = U2  * mesh_step**2 
 
-        # Store the Fourier transform for each k-point as a spinor
-        FT_psi[i, j] = U1 * mesh_step**2
+            # Store the Fourier transform for each k-point as a spinor
+            FT_psi[i, j] = U1 * mesh_step**2
 
-    print(f"Progress: {i+1}/{steps}")
+        print(f"Progress: {i+1}/{steps}")
 
-# The normalise Momentum distribution
-M_xy /= np.sum(M_xy) 
-FT_psi/= np.sum(FT_psi, axis=0)  
+    M_xy /= np.sum(M_xy) # The normalise Momentum distribution
+    idx = np.unravel_index(np.argmax(abs(M_xy)), M_xy.shape)
+    max_M_xy = [n, 0], max_M_xy[n, 1] = kx[idx[0]], ky[idx[1]]
 
+
+    FT_psi/= np.sum(FT_psi, axis=0) # The normalise Momentum distribution
+    idy = np.unravel_index(np.argmax(np.abs(FT_psi)), FT_psi.shape)
+    max_FT_psi[n] = FT_psi[idy[0], idy[1]]
+
+# check that the eigevalues is a pefrect square for reshaping
+grid_size = int(np.sqrt(k))
+if grid_size ** 2 != k:
+    raise ValueError("k must be a perfect square to reshape into a grid")
+
+max_FT_psi_grid = max_FT_psi.reshape(grid_size, grid_size, 2)
 
 # Makes the berry phase continuous by removing 2pi jumps
 def phase_correction(phase_current, phase_previous):
@@ -101,7 +115,7 @@ def align_phase(current, reference):
     return current * np.exp(-1j * np.angle(phase))
 
 
-Nk = steps-1  # Number of k-points in each direction (excluding the last point for periodicity)
+Nk = int(np.sqrt(k))-1  # Number of k-points in each direction (excluding the last point for periodicity)
 
 berry_flux_total = 0.0 # Initial value of the integral
     
@@ -111,10 +125,10 @@ for i in range(Nk):
     for j in range(Nk):
 
         # Energy band (n = 0 or 1)
-        u = FT_psi[i, j]  # wavefunction at (kx, ky)
-        ux = FT_psi[i+1, j]
-        uxy = FT_psi[i+1, j+1]
-        uy = FT_psi[i, j+1]
+        u = max_FT_psi_grid[i, j]  # wavefunction at (kx, ky)
+        ux = max_FT_psi_grid[i+1, j]
+        uxy = max_FT_psi_grid[i+1, j+1]
+        uy = max_FT_psi_grid[i, j+1]
 
         #u =  M_xy[i, j]  # wavefunction at (kx, ky)
         #ux =  M_xy[i+1, j]
@@ -154,7 +168,7 @@ for i in range(Nk):
 print(f"Chern number: {Chern}")
 
 # Plotting the Berry curvature map
-plt.figure(figsize=(8, 6))
+plt.figure()
 plt.contourf(kx[:-1], ky[:-1], berry_curve_map, cmap='plasma')
 plt.title(f'Berry Curvature Map (Chern number: {Chern})')
 plt.xlabel('kx (1/nm)')
