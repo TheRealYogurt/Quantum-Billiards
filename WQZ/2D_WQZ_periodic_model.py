@@ -1,8 +1,9 @@
 import pybinding as pb, matplotlib.pyplot as plt, numpy as np
+from multiprocessing import Pool, cpu_count
 
 pb.pltutils.use_style()
 
-def QWZ_Model(t = 1, M = -1.5, a = 0.2, b = 1.5 * 0.2):
+def QWZ_Model(t = 1, M = 2.4, a = 0.2, b = 1.5 * 0.2):
 
     i = 1j # Pauli matrices 
     sigma_0 = np.array([[1, 0], [0, 1]]); sigma_x = np.array([[0, 1], [1, 0]])
@@ -35,30 +36,42 @@ def QWZ_Model(t = 1, M = -1.5, a = 0.2, b = 1.5 * 0.2):
 
     return lat
 
-model = pb.Model(QWZ_Model(), pb.translational_symmetry())
 
-solver = pb.solver.lapack(model)
+scale = 5; steps = scale * 400; cap = scale * 2 * np.pi
+kx = np.linspace(0, 2*cap, steps) #, endpoint=False)
+ky = np.linspace(0, 2*cap, steps) #, endpoint=False)
 
-scale = 2; steps = scale * 500; cap = scale * 2 * np.pi
-kx = np.linspace(0, 2*cap, steps, endpoint=False)
-ky = np.linspace(0, 2*cap, steps, endpoint=False)
-
-
-Wavefunction_map = np.zeros((steps, steps, 2), dtype=complex)
-
-for i in range(steps):
-    for j in range (steps):
-        k_point = [kx[i], ky[j]]
-        k_space_function = solver.set_wave_vector(k = k_point )
-        
-        wavefunction_kx_ky = solver.eigenvectors
-
-        Wavefunction_map[i,j] = wavefunction_kx_ky[:,0] # pick the band here 
+# The wavefunction in k-space 
+def compute_k_wavefunction(i):
 
     print(f"Wavefunction Progress: {i+1}/{steps}")
 
+    model = pb.Model(QWZ_Model(), pb.translational_symmetry())
+    solver = pb.solver.lapack(model)
 
-Wavefunction_map /= np.sum(Wavefunction_map)
+    row = np.zeros((steps, 2), dtype=complex)
+
+    for j in range (steps):
+        k_point = [kx[i], ky[j]]
+        k_space_function = solver.set_wave_vector(k = k_point)
+        wavefunction_kx_ky = solver.eigenvectors
+        row[j] = wavefunction_kx_ky[:, 0] # pick a band here 
+        
+    return i, row  
+
+
+if __name__ == "__main__":
+
+    # Multiprocessing
+    with Pool(processes=cpu_count()) as pool:
+         results = list(pool.imap(compute_k_wavefunction, range(steps)))
+
+    Wavefunction_map = np.zeros((steps, steps, 2), dtype=complex)
+
+    for i, row in results:
+        Wavefunction_map[i] = row
+
+    Wavefunction_map /= np.sum(Wavefunction_map)
 
 
 # Makes the berry phase continuous by removing 2pi jumps
@@ -77,12 +90,11 @@ def align_phase(current, reference):
 
 
 # The Chern number calculation: 
-berry_flux_total = 0.0 # Initial value of the integral
-    
-berry_curve_map = np.zeros((steps, steps))
+def compute_chern_number(i):
 
-for i in range(steps-1):
-    for j in range(steps-1):
+    row = np.zeros(steps -1)
+
+    for j in range(steps -1):
 
         # Energy band (n = 0 or 1)
         u = Wavefunction_map[i, j, :]  # wavefunction at (kx, ky)
@@ -107,17 +119,31 @@ for i in range(steps-1):
         berry_curve = np.log(phase).imag # Im{ ln[ exp(iφ) ] }
 
         # Correct the phase to make it continuous - avoids 2π jumps
-        if i > 0 and j > 0:
-            berry_curve = phase_correction(berry_curve, berry_curve_map[i - 1, j - 1])
+        if j > 0:
+            berry_curve = phase_correction(berry_curve, row[j - 1])
+
+        row[j] = berry_curve # φ
+
+    print(f"Berry Progress: {i+1}/{steps-1}")
+
+    return i, row
 
 
-        berry_curve_map[i,j] = berry_curve # φ
+if __name__ == "__main__":
+    
+    # Multiprocessing
+    with Pool(processes=cpu_count()) as pool:
+        results = list(pool.imap(compute_chern_number, range(steps-1))) 
 
-        berry_flux_total += berry_curve # φ
+    berry_curve_map = np.zeros((steps, steps))
 
-        chern = round(berry_flux_total / ((cap + cap ))) # have to round because numbers are not integers e.g. 0.99999 
+    for i, row in results:
+        berry_curve_map[i, :steps -1] = row
+        
+    berry_flux_total = np.sum(berry_curve_map) 
+    chern = round(berry_flux_total / ((cap + cap ))) # have to round because numbers are not integers e.g. 0.99999 
 
-    print(f"Berry Progress: {i+1}/{steps}")
+    print(f"\nChern number: {chern}")
 
 
 plt.figure()
