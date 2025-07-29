@@ -42,6 +42,8 @@ def QWZ_Model(t = 1, M = 2.4, a = 0.2, b = 1.5 * 0.2):
 
     return lat
 
+rad = 1
+shape = pb.circle(radius=rad, center={0, 0})
 
 scale = 5; steps = scale * 400; cap = scale * 2 * np.pi
 kx = np.linspace(-cap, cap, steps) #, endpoint=False)
@@ -52,10 +54,12 @@ M = 4.7; M_values = np.linspace(-M, M, 12)
 # The wavefunction in k-space 
 def compute_k_wavefunction(i):
 
-    model = pb.Model(QWZ_Model(M = current_M), pb.translational_symmetry())
+    model = pb.Model(QWZ_Model(M = current_M), shape, pb.translational_symmetry())
     solver = pb.solver.lapack(model)
 
-    row = np.zeros((steps, 2), dtype=complex)
+    k = np.size(solver.eigenvalues) # number of eigenvalues / functions
+
+    row = np.zeros((steps, k), dtype=complex)
 
     for j in range (steps):
         k_point = [kx[i], ky[j]]
@@ -75,7 +79,12 @@ def compute_wavefunction_map(M):
     with Pool(processes=cpu_count()) as pool:
          results = list(tqdm(pool.imap(compute_k_wavefunction, range(steps)), total=steps, desc=f"M={M} Wavefunctions"))
 
-    Wavefunction_map = np.zeros((steps, steps, 2), dtype=complex)
+    model = pb.Model(QWZ_Model(M = current_M), shape, pb.translational_symmetry())
+    solver = pb.solver.lapack(model)
+
+    k = np.size(solver.eigenvalues) # number of eigenvalues / functions
+
+    Wavefunction_map = np.zeros((steps, steps, k), dtype=complex)
 
     for i, row in results:
         Wavefunction_map[i] = row
