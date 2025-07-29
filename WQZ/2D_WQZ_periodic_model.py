@@ -1,7 +1,13 @@
 import pybinding as pb, matplotlib.pyplot as plt, numpy as np
 from multiprocessing import Pool, cpu_count
+from tqdm import tqdm
+import math
 
 pb.pltutils.use_style()
+
+# Global variables:
+current_M = None
+shared_Wavefunction_map = None  
 
 def QWZ_Model(t = 1, M = 2.4, a = 0.2, b = 1.5 * 0.2):
 
@@ -38,15 +44,15 @@ def QWZ_Model(t = 1, M = 2.4, a = 0.2, b = 1.5 * 0.2):
 
 
 scale = 5; steps = scale * 400; cap = scale * 2 * np.pi
-kx = np.linspace(0, 2*cap, steps) #, endpoint=False)
-ky = np.linspace(0, 2*cap, steps) #, endpoint=False)
+kx = np.linspace(-cap, cap, steps) #, endpoint=False)
+ky = np.linspace(-cap, cap, steps) #, endpoint=False)
+
+M = 4.7; M_values = np.linspace(-M, M, 12)
 
 # The wavefunction in k-space 
 def compute_k_wavefunction(i):
 
-    print(f"Wavefunction Progress: {i+1}/{steps}")
-
-    model = pb.Model(QWZ_Model(), pb.translational_symmetry())
+    model = pb.Model(QWZ_Model(M = current_M), pb.translational_symmetry())
     solver = pb.solver.lapack(model)
 
     row = np.zeros((steps, 2), dtype=complex)
@@ -60,11 +66,14 @@ def compute_k_wavefunction(i):
     return i, row  
 
 
-if __name__ == "__main__":
+def compute_wavefunction_map(M):
+
+    global current_M
+    current_M = M
 
     # Multiprocessing
     with Pool(processes=cpu_count()) as pool:
-         results = list(pool.imap(compute_k_wavefunction, range(steps)))
+         results = list(tqdm(pool.imap(compute_k_wavefunction, range(steps)), total=steps, desc=f"M={M} Wavefunctions"))
 
     Wavefunction_map = np.zeros((steps, steps, 2), dtype=complex)
 
@@ -72,6 +81,8 @@ if __name__ == "__main__":
         Wavefunction_map[i] = row
 
     Wavefunction_map /= np.sum(Wavefunction_map)
+
+    return Wavefunction_map
 
 
 # Makes the berry phase continuous by removing 2pi jumps
@@ -90,17 +101,19 @@ def align_phase(current, reference):
 
 
 # The Chern number calculation: 
-def compute_chern_number(i):
+def compute_berry_curvature(i):
+
+    global shared_Wavefunction_map
 
     row = np.zeros(steps -1)
 
     for j in range(steps -1):
 
         # Energy band (n = 0 or 1)
-        u = Wavefunction_map[i, j, :]  # wavefunction at (kx, ky)
-        ux = Wavefunction_map[i+1, j, :]
-        uxy = Wavefunction_map[i+1, j+1, :]
-        uy = Wavefunction_map[i, j+1, :]
+        u = shared_Wavefunction_map[i, j, :]  # wavefunction at (kx, ky)
+        ux = shared_Wavefunction_map[i+1, j, :]
+        uxy = shared_Wavefunction_map[i+1, j+1, :]
+        uy = shared_Wavefunction_map[i, j+1, :]
 
         # Wavefunction alignment - u is the current point, ux is the next point
         ux = align_phase(ux, u)
@@ -124,16 +137,17 @@ def compute_chern_number(i):
 
         row[j] = berry_curve # φ
 
-    print(f"Berry Progress: {i+1}/{steps-1}")
-
     return i, row
 
 
-if __name__ == "__main__":
+def compute_chern_number(Wavefunction_map, M):
+
+    global shared_Wavefunction_map
+    shared_Wavefunction_map = Wavefunction_map
     
     # Multiprocessing
     with Pool(processes=cpu_count()) as pool:
-        results = list(pool.imap(compute_chern_number, range(steps-1))) 
+        results = list(tqdm(pool.imap(compute_berry_curvature, range(steps - 1)), total=steps - 1, desc=f"M={M} Berry")) 
 
     berry_curve_map = np.zeros((steps, steps))
 
@@ -143,13 +157,31 @@ if __name__ == "__main__":
     berry_flux_total = np.sum(berry_curve_map) 
     chern = round(berry_flux_total / ((cap + cap ))) # have to round because numbers are not integers e.g. 0.99999 
 
-    print(f"\nChern number: {chern}")
+    return chern, berry_curve_map
 
+# Main loop for the plots: 
+cols = 4 
+rows = math.ceil(len(M_values) / cols)
 
-plt.figure()
-plt.contourf(kx, ky, berry_curve_map, cmap='plasma')
-plt.title(f'Berry Curvature Map (Chern number: {chern})')
-plt.xlabel('kx (1/nm)')
-plt.ylabel('ky (1/nm)')
-plt.colorbar()
+fig, axs = plt.subplots(rows, cols, figsize=(5* cols, 5 * rows))
+axs = axs.flatten()
+
+for idx , M in enumerate(M_values):
+
+    Wavefunction_map = compute_wavefunction_map(M)
+    chern, berry_map = compute_chern_number(Wavefunction_map, M)
+
+    ax = axs[idx]
+    c = ax.contourf(kx, ky, berry_map, cmap='plasma')
+    
+    ax.set_title(f'Berry Curvature (M = {M:.1f} Chern =  {chern})')
+    ax.set_xlabel('kx (1/nm)')
+    ax.set_ylabel('ky (1/nm)')
+    fig.colorbar(c, ax = ax)
+
+# delete any unused plots:
+for i in range(len(M_values), len(axs)): 
+    fig.delaxes(axs[i])
+
+plt.tight_layout()
 plt.show()
