@@ -54,7 +54,7 @@ M = 4.7; M_values = np.linspace(-M, M, 12)
 # The wavefunction in k-space 
 def compute_k_wavefunction(i):
 
-    model = pb.Model(QWZ_Model(M = current_M), shape, pb.translational_symmetry())
+    model = pb.Model(QWZ_Model(M = current_M), shape, pb.translational_symmetry(a1 = rad, a2 = rad))
     solver = pb.solver.lapack(model)
 
     k = np.size(solver.eigenvalues) # number of eigenvalues / functions
@@ -79,7 +79,7 @@ def compute_wavefunction_map(M):
     with Pool(processes=cpu_count()) as pool:
          results = list(tqdm(pool.imap(compute_k_wavefunction, range(steps)), total=steps, desc=f"M={M} Wavefunctions"))
 
-    model = pb.Model(QWZ_Model(M = current_M), shape, pb.translational_symmetry())
+    model = pb.Model(QWZ_Model(M = current_M), shape, pb.translational_symmetry(a1 = rad, a2 = rad))
     solver = pb.solver.lapack(model)
 
     k = np.size(solver.eigenvalues) # number of eigenvalues / functions
