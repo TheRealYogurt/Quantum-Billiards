@@ -52,7 +52,7 @@ n_cols = 4
 n_total_plots = 2 * len(M_values)  # 2 plots per M
 n_rows = int(np.ceil(n_total_plots / n_cols))
 
-fig, axs = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
+fig, axs = plt.subplots(n_rows, n_cols, figsize=(4 * n_cols, 3 * n_rows))
 axs = axs.flatten()
 
 # Loop over the different M values
@@ -75,7 +75,7 @@ for idx, M in enumerate(M_values):
 
     # Set up binning
     s = np.linspace(0, 6, 100000)
-    Bin = round(np.sqrt(len(Sorted_Eigenvalues)) * 0.75)
+    Bin = round(np.sqrt(len(Sorted_Eigenvalues)) * 0.65)
 
     # Plot Spectral Staircase - left plot 
     if 2 * idx < len(axs): 
