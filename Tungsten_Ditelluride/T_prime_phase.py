@@ -4,6 +4,7 @@ from math import sqrt
 
 pb.pltutils.use_style()
 
+# With SOC:
 def monolayer_1T_WTe2_SOC():
     # lattice vectors
     a = 3.477; b = 6.249; a1=[a, 0]; a2=[0, b] 
@@ -103,6 +104,7 @@ def monolayer_1T_WTe2_SOC():
     return lat
 
 
+# No SOC but emtries are spinors:
 def monolayer_1T_WTe2_basic():
     # lattice vectors
     a = 3.477; b = 6.249; a1=[a, 0]; a2=[0, b] 
@@ -197,6 +199,87 @@ def monolayer_1T_WTe2_basic():
         # Between Cells Hoppings: Next cell over hoppoings(tothe left)
         ([-2, 0], 'W1', 'Te2', hopping_parameter(t = -t_0ABx, lambda_x = 0, lambda_y = 0, lambda_z = 0)), 
         ([-2, 0], 'Te1', 'W2', hopping_parameter(t = t_0ABx, lambda_x = 0, lambda_y = 0, lambda_z = 0)), 
+    )
+
+    return lat
+
+
+# The absolute basic: 
+def monolayer_1T_WTe2_basic_basic():
+    # lattice vectors
+    a = 3.477; b = 6.249; a1=[a, 0]; a2=[0, b] 
+
+    #nsite energies d -> W, p -> Te
+    mu_d = 0.74; mu_p = -1.75
+    
+    # Hopping energies in eV: 
+    t_px = 1.13; t_dx = -0.41; t_pAB = 0.40; t_dAB = 0.51 
+    t_0AB = 0.39; t_0ABx = 0.29; t_0x = 0.14; t_py = 0.13   
+
+  
+    lat = pb.Lattice( a1, a2) # Rectangular 2D lattice
+
+    lat.add_sublattices(
+        # Main cell: 
+        ('W1', [ -0.25 * a, 0.32* b], mu_d), # Sublattice A 
+        ('Te1',[-0.25 * a, -0.07 * b], mu_p), # Sublattice A
+        ('W2', [ 0.25 * a, -0.32 * b], mu_d), # Sublattice B 
+        ('Te2',[ 0.25 * a, 0.07 * b], mu_p) # Sublattice B 
+    )
+    
+
+    lat.add_hoppings(
+        # Main Cell Hoppings: Between atomms in the cell
+        ([0, 0], 'Te1', 'W1', 0), 
+        ([0, 0], 'Te2', 'W1', t_0AB), 
+
+        ([0, 0], 'Te2', 'Te1', t_pAB),
+        ([0, 0], 'W2', 'Te1', -t_0AB), 
+
+        ([0, 0], 'Te2', 'W2', 0), 
+
+        # Between Cells Hoppings: From inside the cell to the right (outside the cell)   
+        ([1, 0], 'W1', 'W1', t_dx),
+        ([1, 0], 'W2', 'W2', t_dx), 
+
+        ([1, 0], 'Te2', 'Te2', t_px), 
+        ([1, 0], 'Te1', 'Te1', t_px),
+
+        ([1, 0], 'Te2', 'Te1', t_pAB),
+        
+        ([1, 0], 'Te2', 'W1', -t_0AB),
+        
+        ([1, 0], 'W2', 'Te1', t_0AB),
+
+        ([1, 0], 'W1', 'Te2', t_0ABx),  
+        ([1, 0], 'W1', 'Te1', t_0x, ),  
+
+        ([1, 0], 'Te1', 'W2', -t_0ABx), 
+        
+        ([1, 0], 'W2', 'Te2', t_0x), 
+        
+        # Between Cells Hoppings: From inside the cell to the bottom (outside the cell)
+        ([0, -1], 'Te1', 'W1', 0),
+        
+        ([0, -1], 'W2', 'W1', t_dAB),
+        ([1, -1], 'W2', 'W1', t_dAB),
+        
+        ([0, -1], 'Te2', 'Te2', t_py),
+
+        # Between Cells Hoppings: From inside the cell to the top (outside the cell)
+        ([0, 1], 'Te2', 'W2', 0), 
+        
+        ([0, 1], 'Te1', 'Te1', t_py), 
+                
+        # Between Cells Hoppings: From inside the cell to the left (outside the cell)
+        ([-1, 0], 'W2', 'Te2', -t_0x), 
+
+        # Between Cells Hoppings: From outside the cell to the inside(from the left)
+        ([-1, 0], 'W1', 'Te1', -t_0x), 
+
+        # Between Cells Hoppings: Next cell over hoppoings(tothe left)
+        ([-2, 0], 'W1', 'Te2', -t_0ABx), 
+        ([-2, 0], 'Te1', 'W2', t_0ABx), 
     )
 
     return lat
