@@ -12,7 +12,7 @@ circle5 = pb.circle(radius=rad*0.25, center=[-x/2, y/4]); circle6 = pb.circle(ra
 
 shape = circle1 + circle2 + circle3 + circle4 - circle5 - circle6;  #plt.figure; shape.plot()
 
-model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape); plt.figure(); model.plot() # define the model and plot it 
+model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape); # plt.figure(); model.plot() # define the model and plot it 
 #################################### THE SYSTEM ####################################
 
 #################################### SOLVE THE EIGENVALUE PROBLEM ####################################
