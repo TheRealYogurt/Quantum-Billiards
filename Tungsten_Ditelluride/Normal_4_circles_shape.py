@@ -10,7 +10,7 @@ circle3 = pb.circle(radius= rad, center=[-x,y]); circle4 = pb.circle(radius= rad
 
 shape = circle1 + circle2 + circle3 + circle4;  #shape.plot()
 
-model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape);  plt.figure(); model.plot() # define the model and plot it 
+model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape); # plt.figure(); model.plot() # define the model and plot it 
 #################################### THE SYSTEM ####################################
 
 #################################### SOLVE THE EIGENVALUE PROBLEM ####################################
