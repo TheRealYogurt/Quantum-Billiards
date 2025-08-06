@@ -5,16 +5,11 @@ from numpy.polynomial import Polynomial
 
 scale = 2; x = 2 * scale; y = 2 * scale ; rad = 3 * scale 
 
-
-
 circle1 = pb.circle(radius= rad, center=[x,y]); circle2 = pb.circle(radius= rad, center=[-x,-y]) 
 circle3 = pb.circle(radius= rad, center=[-x,y]); circle4 = pb.circle(radius= rad, center=[x,-y])
 circle5 = pb.circle(radius=rad*0.25, center=[-x/2, y/4])
 
-
 shape = circle1 + circle2 + circle3 + circle4 - circle5; #plt.figure(); shape.plot()
-
-
 model = pb.Model(graphene.monolayer(),shape); #model.plot()
 
 #################################### SOLVE THE EIGENVALUE PROBLEM ####################################
