@@ -43,7 +43,7 @@ def QWZ_Model(t = 1, M = 2.4, a = 0.2, b = 1.5 * 0.2):
     return lat
 
 rad = 1
-shape = pb.circle(radius=rad, center={0, 0})
+shape = pb.circle(radius=rad, center=[0, 0])
 
 scale = 5; steps = scale * 400; cap = scale * 2 * np.pi
 kx = np.linspace(-cap, cap, steps) #, endpoint=False)
