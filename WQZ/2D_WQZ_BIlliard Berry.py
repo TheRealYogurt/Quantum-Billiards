@@ -57,7 +57,7 @@ mesh_step = kx[1]-kx[0]
 max_M_xy = np.zeros((k, 2), dtype=complex)
 max_FT_psi = np.zeros((k, 2), dtype=complex) 
 
-for n in range(len(k)):
+for n in range(k):
     n = n; psi = wavefunctions[:, n] # eigen fucntion, index 0 being the fisrt
     psi_reshaped = psi.reshape((len(r), 2))  # reshape 
 
@@ -86,7 +86,7 @@ for n in range(len(k)):
 
     M_xy /= np.sum(M_xy) # The normalise Momentum distribution
     idx = np.unravel_index(np.argmax(abs(M_xy)), M_xy.shape)
-    max_M_xy = [n, 0], max_M_xy[n, 1] = kx[idx[0]], ky[idx[1]]
+    max_M_xy = [n, 0] = kx[idx[0]];  max_M_xy[n, 1] = ky[idx[1]]
 
 
     FT_psi/= np.sum(FT_psi, axis=0) # The normalise Momentum distribution
