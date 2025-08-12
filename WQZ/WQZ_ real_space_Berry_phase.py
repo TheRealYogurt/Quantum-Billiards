@@ -112,7 +112,7 @@ for x in np.arange(min(positions[:, 0]), max(positions[:, 0]) - a, a):
         U23 = expectation_value(i3, i2, psi_2, psi_3)
         U30 = expectation_value(i0, i3, psi_3, psi_0)
 
-        U = U01 + U12 + U23 + U30 # exp(φ)
+        U = U01 * U12 * U23 * U30 # exp(φ)
 
         berry_phase = np.angle(U) # phase φ
 
