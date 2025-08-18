@@ -35,7 +35,7 @@ def QWZ_Model(t = 1, M = 1, a = 0.2, b = 1.5 * 0.2):
     return lat
 
 # Size:
-scale = 5; x0 = 1.1 * scale; y0 = 0.5 * scale
+scale = 7; x0 = 1.1 * scale; y0 = 0.5 * scale
 shape = pb.Polygon([[x0, y0], [x0, -y0], [-x0, -y0], [-x0, y0]])
 
 # Parameters:
@@ -128,8 +128,8 @@ F = np.array([f for _, f in berry_map])  # Berry curvature values
 x_vals = xy[:, 0]; y_vals = xy[:, 1]
 
 # Create grid for contour plot
-xi = np.linspace(np.min(x_vals), np.max(x_vals), 20000)  
-yi = np.linspace(np.min(y_vals), np.max(y_vals), 20000)
+xi = np.linspace(np.min(x_vals), np.max(x_vals), 1000)  
+yi = np.linspace(np.min(y_vals), np.max(y_vals), 1000)
 X, Y = np.meshgrid(xi, yi)
 
 # Interpolate Berry curvature
