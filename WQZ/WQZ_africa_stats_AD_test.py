@@ -126,9 +126,9 @@ for idx, M in enumerate(M_values):
         ax = axs[2 * idx + 1]  
         ax.hist(S_n_normalised_2, bins=Bin, density=True, alpha=0.6, label="Numerical $P(S)$")
         
-        label_poisson = fr"Poisson$_{{\mathit{{A}}={AD_poisson:.3f}}}$"
-        label_goe = fr"GOE$_{{\mathit{{A}}={AD_goe:.3f}}}$"
-        label_gue = fr"GUE$_{{\mathit{{A}}={AD_gue:.3f}}}$"
+        label_poisson = fr"Poisson$_{{\mathit{{A^2}}={AD_poisson:.3f}}}$"
+        label_goe = fr"GOE$_{{\mathit{{A^2}}={AD_goe:.3f}}}$"
+        label_gue = fr"GUE$_{{\mathit{{A^2}}={AD_gue:.3f}}}$"
         
         ax.plot(s, np.exp(-s), linestyle='dashed', label= label_poisson)
         ax.plot(s, (np.pi / 2) * s * np.exp(- (np.pi / 4) * s**2), linestyle='solid', label=label_goe)
