@@ -4,7 +4,7 @@ from math import pi, sqrt
 from numpy.polynomial import Polynomial
 
 #################################### THE SYSTEM #################################### 
-scale = 2; x = 2 * scale; y = 2 * scale ; rad = 3 * scale 
+scale = 1; x = 2 * scale; y = 2 * scale ; rad = 3 * scale 
 
 circle1 = pb.circle(radius= rad, center=[x,y]); circle2 = pb.circle(radius= rad, center=[-x,-y]) 
 circle3 = pb.circle(radius= rad, center=[-x,y]); circle4 = pb.circle(radius= rad, center=[x,-y])
@@ -16,7 +16,7 @@ model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape); # plt.figure(); mode
 #################################### THE SYSTEM ####################################
 
 #################################### SOLVE THE EIGENVALUE PROBLEM ####################################
-solver = pb.solver.arpack(model, k=350 * scale, sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
+solver = pb.solver.arpack(model, k=530 * scale, sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
 eigenvalues = solver.calc_eigenvalues(); #plt.figure(); eigenvalues.plot()
 Sorted_Eigenvalues = np.sort(solver.eigenvalues) # sort the eigen values in ascending order, to ensure lowest ones come first  
 N_E = np.arange(1, len(Sorted_Eigenvalues) + 1)  # Number of states below each energy level
