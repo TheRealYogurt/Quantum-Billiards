@@ -2,16 +2,16 @@ import pybinding as pb, matplotlib.pyplot as plt, numpy as np
 from pybinding.repository import group6_tmd
 from numpy.polynomial import Polynomial
 
-scale = 2
+scale = 1.2
 circle = pb.circle(radius=2*scale); shape = circle 
 model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape)
 
-solver = pb.solver.arpack(model, k=320 * scale, sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
+solver = pb.solver.arpack(model, k=360 * scale, sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
 eigenvalues = solver.calc_eigenvalues(); #plt.figure(figsize=(6,4)); eigenvalues.plot()
 Sorted_Eigenvalues = np.sort(solver.eigenvalues) # sort the eigen values in ascending order, to ensure lowest ones come first  
 N_E = np.arange(1, len(Sorted_Eigenvalues) + 1)  # Number of states below each energy level
 
-poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg=46)
+poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg=41)
 N_smooth = poly(Sorted_Eigenvalues) # extracting the smoothed over Eigenvalues
 S_n_2 = np.diff(N_smooth); S_n_normalised_2 = S_n_2/np.mean(S_n_2) # Compute spacings between each level
 
