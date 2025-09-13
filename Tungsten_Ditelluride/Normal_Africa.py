@@ -4,7 +4,7 @@ from math import pi, sqrt
 from numpy.polynomial import Polynomial
 
 #################################### THE SYSTEM #################################### 
-scale = 1.5; x0 = 1.1 * scale; y0 = 0.5* scale; shifty = 1.44* scale; shiftx = -0.6* scale
+scale = 1; x0 = 1.1 * scale; y0 = 0.5* scale; shifty = 1.44* scale; shiftx = -0.6* scale
 circle1 =  pb.circle(radius=2* scale) # define a circle with radius 1nm
 circle2 = pb.circle(radius=1.31* scale, center=[-1.7* scale, 0.66* scale]) # define a circle with radius 1nm
 rectangle = pb.Polygon([[x0 + shiftx, y0+ shifty], [x0+ shiftx, -y0+ shifty], [-x0+ shiftx, -y0+ shifty], [-x0+ shiftx, y0+ shifty]])
@@ -14,13 +14,13 @@ model = pb.Model(group6_tmd.monolayer_3band("WTe2"),shape) #plt.figure(figsize=(
 #################################### THE SYSTEM ####################################
 
 #################################### SOLVE THE EIGENVALUE PROBLEM ####################################
-solver = pb.solver.arpack(model, k=350 * scale, sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
+solver = pb.solver.arpack(model, k=425 * scale, sigma=0.2) # solves for the k-number lowest energy eigen values around sigma 
 eigenvalues = solver.calc_eigenvalues(); #plt.figure(figsize=(6,4)); eigenvalues.plot()
 Sorted_Eigenvalues = np.sort(solver.eigenvalues) # sort the eigen values in ascending order, to ensure lowest ones come first  
 N_E = np.arange(1, len(Sorted_Eigenvalues) + 1)  # Number of states below each energy level
 #################################### SOLVE THE EIGENVALUE PROBLEM ####################################
 
-poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg=21)
+poly = Polynomial.fit(Sorted_Eigenvalues, N_E, deg=35)
 N_smooth = poly(Sorted_Eigenvalues) # extracting the smoothed over Eigenvalues
 S_n_2 = np.diff(N_smooth); S_n_normalised_2 = S_n_2/np.mean(S_n_2) # Compute spacings between each level
 
