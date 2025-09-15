@@ -4,7 +4,7 @@ from math import pi, sqrt
 from numpy.polynomial import Polynomial
 
 #################################### THE SYSTEM #################################### 
-scale = 1; circle =  pb.circle(radius=2*scale) # define a circle with radius 1nm
+scale = 2; circle =  pb.circle(radius=2*scale) # define a circle with radius 1nm
 model = pb.Model(graphene.monolayer(),circle); #plt.figure(figsize=(6,4)); model.plot() # define the model and plot it 
 #################################### THE SYSTEM #################################### 
 
